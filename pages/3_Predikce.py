@@ -53,11 +53,14 @@ game_type_excel = (
     "Regular Season" if game_type_ui == "Regular Season" else "Play-off"
 )
 
-params = (
-    params_raw[params_raw["Game_Type"] == game_type_excel]
-    .assign(Parameter=lambda x: x["Parameter"].astype(str).str.strip())
-    .set_index("Parameter")["Coefficient"]
-)
+#params = (
+#    params_raw[params_raw["Game_Type"] == game_type_excel]
+#    .assign(Parameter=lambda x: x["Parameter"].astype(str).str.strip())
+#    .set_index("Parameter")["Coefficient"]
+#)
+
+params = params_raw.set_index("Parameter")["Coefficient"]
+
 # ==================================================
 # Výběr týmů
 # ==================================================
