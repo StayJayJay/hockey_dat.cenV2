@@ -23,14 +23,20 @@ def load_data():
 params_raw, teams = load_data()
 
 # ==================================================
-# NORMALIZACE LISTU PARAMETRY
+# NORMALIZACE LISTU PARAMETRY (SPRÁVNĚ)
 # ==================================================
-# Vezmeme pouze první 3 relevantní sloupce
+# vezmeme první 3 relevantní sloupce
 params_raw = params_raw.iloc[:, :3]
 params_raw.columns = ["Game_Type", "Parameter", "Coefficient"]
 
-# odstranit prázdné řádky
+# doplnění sekcí dolů (Regular Season / Play-off)
+params_raw["Game_Type"] = params_raw["Game_Type"].ffill()
+
+# odstranit řádky bez parametrů / koeficientů
 params_raw = params_raw.dropna(subset=["Parameter", "Coefficient"])
+
+# očistit názvy parametrů
+params_raw["Parameter"] = params_raw["Parameter"].astype(str).str.strip()
 
 # ==================================================
 # Výběr typu zápasu
