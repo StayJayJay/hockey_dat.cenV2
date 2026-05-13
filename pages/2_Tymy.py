@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Týmy", layout="wide")
+st.set_page_config(page_title="Tymy", layout="wide")
 st.title("🏒 Týmy – síla & výkonnost")
 
 # --------------------------------------------------
