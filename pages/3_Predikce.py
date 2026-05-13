@@ -110,7 +110,13 @@ def get_param(name, default=0.0):
         st.warning(f"Chybí parametr: {name}")
         return default
     return float(params[name])
+#===========================================================================================================================================
 
+st.subheader("🧪 Debug – nalezené parametry")
+st.write(list(params.index))
+st.stop()
+
+#===========================================================================================================================================
 def logistic(x):
     return 1 / (1 + np.exp(-x))
 
