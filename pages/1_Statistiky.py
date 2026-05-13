@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 st.set_page_config(page_title="Statistiky", layout="wide")
-st.title("📊 Statistiky zápasů – ELH")
+st.title("Statistiky zápasů – ELH")
 
 # --------------------------------------------------
 # Načtení dat

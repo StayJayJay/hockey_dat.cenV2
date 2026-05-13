@@ -5,7 +5,7 @@ import pandas as pd
 from pathlib import Path
 
 st.set_page_config(page_title="Týmy", layout="wide")
-st.title("🏒 Týmy – Team Strength & výkonnost")
+st.title("Týmy – Team Strength & výkonnost")
 
 # --------------------------------------------------
 # Načtení dat (stejný pattern jako app.py)

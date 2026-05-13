@@ -6,7 +6,7 @@ import numpy as np
 from pathlib import Path
 
 st.set_page_config(page_title="Predikce zápasu", layout="wide")
-st.title("🔮 Predikce zápasu – ELH")
+st.title("Predikce zápasu – ELH")
 
 # ==================================================
 # Načtení dat
