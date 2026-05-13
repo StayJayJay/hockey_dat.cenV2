@@ -56,8 +56,7 @@ st.title("🏒 ELH – Statistiky & Predikce")
 
 st.markdown(
     """
-    Vítej v analytické aplikaci **ELH**, která je postavená **přímo nad tvým
-    modelem v Excelu** – bez zjednodušování a bez ztráty logiky.
+    Vítej v analytické aplikaci **ELH**
 
     ---
     ### 🧭 Co tady najdeš:
@@ -83,8 +82,8 @@ st.markdown(
 # ==================================================
 # Přehled dostupných datových sheetů (debug / info)
 # ==================================================
-with st.expander("📂 Načtené listy z Excelu"):
-    st.write(list(sheets.keys()))
+# with st.expander("📂 Načtené listy z Excelu"):
+#    st.write(list(sheets.keys()))
 
 st.markdown(
     """
