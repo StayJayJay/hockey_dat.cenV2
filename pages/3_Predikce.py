@@ -71,11 +71,11 @@ team_list = sorted(teams_rs["Team"].unique())
 col1, col2 = st.columns(2)
 
 with col1:
-    home_team = st.selectbox("🏠 Domácí tým", team_list)
+    home_team = st.selectbox("Domácí tým", team_list)
 
 with col2:
     away_team = st.selectbox(
-        "✈️ Hosté",
+        "Hosté",
         team_list,
         index=1 if len(team_list) > 1 else 0
     )
@@ -97,18 +97,18 @@ team_strength_diff = (
 # ==================================================
 # Vstupy modelu (What‑if)
 # ==================================================
-st.subheader("⚙️ Modelové vstupy")
+st.subheader("Modelové vstupy")
 
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    xg_diff = st.slider("xG Diff", -3.0, 3.0, 0.0, 0.05)
+    xg_diff = st.slider("xG Diff", -4.0, 4.0, 0.0, 0.05)
 
 with c2:
-    pp_diff = st.slider("PP Diff", -0.5, 0.5, 0.0, 0.01)
+    pp_diff = st.slider("PP Diff", -1.5, 1.5, 0.0, 0.01)
 
 with c3:
-    goalie_rating = st.slider("Goalie rating", -0.05, 0.05, 0.0, 0.001)
+    goalie_rating = st.slider("Goalie rating", -0.50, 0.50, 0.0, 0.01)
 
 with c4:
     home = st.radio("Home", [1, 0], horizontal=True)
