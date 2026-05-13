@@ -1,36 +1,61 @@
+# -*- coding: utf-8 -*-
+
 import streamlit as st
 import pandas as pd
+from pathlib import Path
 
-st.set_page_config(page_title="Tymy", layout="wide")
-st.title("🏒 Týmy – síla & výkonnost")
+st.set_page_config(page_title="Týmy", layout="wide")
+st.title("🏒 Týmy – Team Strength & výkonnost")
 
 # --------------------------------------------------
-# Načtení dat
+# Načtení dat (stejný pattern jako app.py)
 # --------------------------------------------------
 @st.cache_data
 def load_data():
-    xls = pd.ExcelFile("data/HOCKEY_LOGIC_PREDICTIONS.xlsx")
-    return pd.read_excel(xls, "CALC_TEAMS_SEASON")
+    base_path = Path(__file__).resolve().parent.parent
+    file_path = base_path / "data" / "HOCKEY_LOGIC_PREDICTIONS.xlsx"
+
+    if not file_path.exists():
+        st.error(f"Excel nenalezen: {file_path}")
+        st.stop()
+
+    return pd.read_excel(file_path, sheet_name="CALC_TEAMS_SEASON")
 
 teams = load_data()
 
 # --------------------------------------------------
-# Filtry
+# Sidebar filtry
 # --------------------------------------------------
 with st.sidebar:
-    st.header("🎛️ Filtry")
-    season = st.selectbox("Sezóna", sorted(teams["Season"].unique()))
-    game_type = st.radio("Typ zápasu", ["RS", "PO"], horizontal=True)
+    st.header("Filtry")
 
+    season = st.selectbox(
+        "Sezóna",
+        sorted(teams["Season"].unique())
+    )
+
+    game_type = st.radio(
+        "Typ zápasu",
+        ["RS", "PO"],
+        horizontal=True
+    )
+
+# --------------------------------------------------
+# Filtrování dat
+# --------------------------------------------------
 teams = teams[
     (teams["Season"] == season) &
     (teams["Game Type"] == game_type)
-]
+].copy()
+
+if teams.empty:
+    st.warning("Žádná data pro zvolenou kombinaci.")
+    st.stop()
 
 # --------------------------------------------------
-# Přehled týmů
+# Team Strength – tabulka
 # --------------------------------------------------
-st.subheader("📈 Team Strength")
+st.subheader("📈 Síla týmů (Team Strength)")
 
 teams_sorted = teams.sort_values("Team_Strength", ascending=False)
 
@@ -43,7 +68,7 @@ st.dataframe(
             "avg_Shots_Diff",
             "avg_PP_Rate",
             "avg_PK_Rate",
-            "Team_Strength"
+            "Team_Strength",
         ]
     ],
     use_container_width=True
@@ -54,43 +79,63 @@ st.bar_chart(
 )
 
 # --------------------------------------------------
-# Porovnání týmů
+# Porovnání dvou týmů
 # --------------------------------------------------
 st.subheader("⚔️ Porovnání týmů")
 
 team_list = teams_sorted["Team"].tolist()
 
-c1, c2 = st.columns(2)
+col1, col2 = st.columns(2)
 
-with c1:
+with col1:
     team_a = st.selectbox("Tým A", team_list)
 
-with c2:
-    team_b = st.selectbox("Tým B", team_list, index=1)
+with col2:
+    team_b = st.selectbox(
+        "Tým B",
+        team_list,
+        index=1 if len(team_list) > 1 else 0
+    )
 
-ta = teams_sorted[teams_sorted["Team"] == team_a]
-tb = teams_sorted[teams_sorted["Team"] == team_b]
+ta = teams_sorted[teams_sorted["Team"] == team_a].iloc[0]
+tb = teams_sorted[teams_sorted["Team"] == team_b].iloc[0]
 
-comparison = pd.DataFrame({
-    team_a: ta.iloc[0][
-        ["avg_xG_Diff", "avg_Shots_Diff", "avg_PP_Rate", "avg_PK_Rate", "Team_Strength"]
+comparison = pd.DataFrame(
+    {
+        team_a: [
+            ta["avg_xG_Diff"],
+            ta["avg_Shots_Diff"],
+            ta["avg_PP_Rate"],
+            ta["avg_PK_Rate"],
+            ta["Team_Strength"],
+        ],
+        team_b: [
+            tb["avg_xG_Diff"],
+            tb["avg_Shots_Diff"],
+            tb["avg_PP_Rate"],
+            tb["avg_PK_Rate"],
+            tb["Team_Strength"],
+        ],
+    },
+    index=[
+        "avg xG Diff",
+        "avg Shots Diff",
+        "avg PP Rate",
+        "avg PK Rate",
+        "Team Strength",
     ],
-    team_b: tb.iloc[0][
-        ["avg_xG_Diff", "avg_Shots_Diff", "avg_PP_Rate", "avg_PK_Rate", "Team_Strength"]
-    ],
-})
+)
 
-st.dataframe(comparison)
+st.dataframe(comparison, use_container_width=True)
 
 # --------------------------------------------------
-# Rychlé insighty
+# Shrnutí
 # --------------------------------------------------
-st.subheader("🧠 Rychlé závěry")
-
-diff = ta["Team_Strength"].values[0] - tb["Team_Strength"].values[0]
+diff = ta["Team_Strength"] - tb["Team_Strength"]
 
 if diff > 0:
     st.success(f"{team_a} má vyšší Team Strength o {diff:.2f}")
-else:
+elif diff < 0:
     st.warning(f"{team_b} má vyšší Team Strength o {abs(diff):.2f}")
-``
+else:
+    st.info("Týmy mají stejnou Team Strength")
