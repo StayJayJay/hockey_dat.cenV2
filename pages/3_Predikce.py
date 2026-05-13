@@ -70,9 +70,14 @@ with col2:
     )
 
 def team_strength(team):
-    return float(
-        teams_rs.loc[teams_rs["Team"] == team, "Team_Strength"]
-    )
+    value = teams_rs.loc[
+        teams_rs["Team"] == team, "Team_Strength"
+    ]
+
+    if value.empty:
+        return 0.0  # bezpečnostní pojistka
+
+    return float(value.iloc[0])
 
 team_strength_diff = (
     team_strength(home_team) - team_strength(away_team)
