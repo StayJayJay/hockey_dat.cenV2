@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
+
 import streamlit as st
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 st.set_page_config(page_title="Predikce zápasu", layout="wide")
 st.title("🔮 Predikce zápasu – ELH")
@@ -10,30 +13,43 @@ st.title("🔮 Predikce zápasu – ELH")
 # --------------------------------------------------
 @st.cache_data
 def load_data():
-    xls = pd.ExcelFile("data/HOCKEY_LOGIC_PREDICTIONS.xlsx")
+    base_path = Path(__file__).resolve().parent.parent
+    file_path = base_path / "data" / "HOCKEY_LOGIC_PREDICTIONS.xlsx"
+
+    sheets = pd.read_excel(file_path, sheet_name=None)
+
     return {
-        "PARAMETRY": pd.read_excel(xls, "PARAMETRY"),
-        "PREDIKCE": pd.read_excel(xls, "PREDIKCE_ZAPASU"),
-        "TEAMS": pd.read_excel(xls, "CALC_TEAMS_SEASON"),
+        "PARAMETRY": sheets["PARAMETRY"],
+        "TEAMS": sheets["CALC_TEAMS_SEASON"],
     }
 
 data = load_data()
 
-params_raw = data["PARAMETRY"]
-teams = data["TEAMS"]
+params_raw = data["PARAMETRY"].copy()
+teams = data["TEAMS"].copy()
 
 # --------------------------------------------------
-# Výběr typu zápasu
+# Normalizace PARAMETRY
 # --------------------------------------------------
-game_type = st.radio(
+params_raw.columns = ["Game_Type", "Parameter", "Coefficient", "Source", "Note"]
+
+# --------------------------------------------------
+# Volba typu zápasu
+# --------------------------------------------------
+game_type_ui = st.radio(
     "Typ zápasu",
     ["Regular Season", "Play-off"],
     horizontal=True
 )
 
-params = params_raw[
-    (params_raw["Game Type"] == ("RS" if game_type == "Regular Season" else "PO"))
-].set_index("Parameter")["Coefficient"]
+game_type_excel = (
+    "Regular Season" if game_type_ui == "Regular Season" else "Play-off"
+)
+
+params = (
+    params_raw[params_raw["Game_Type"] == game_type_excel]
+    .set_index("Parameter")["Coefficient"]
+)
 
 # --------------------------------------------------
 # Výběr týmů
@@ -50,21 +66,17 @@ with col1:
 with col2:
     away_team = st.selectbox("✈️ Hosté", team_list, index=1)
 
-# --------------------------------------------------
-# Načtení team strength
-# --------------------------------------------------
-def get_team_strength(team):
+def team_strength(team):
     return float(
         teams_rs.loc[teams_rs["Team"] == team, "Team_Strength"]
     )
 
-home_strength = get_team_strength(home_team)
-away_strength = get_team_strength(away_team)
-
-team_strength_diff = home_strength - away_strength
+team_strength_diff = (
+    team_strength(home_team) - team_strength(away_team)
+)
 
 # --------------------------------------------------
-# Manuální vstupy (What-if mód)
+# Vstupní hodnoty (What‑if)
 # --------------------------------------------------
 st.subheader("⚙️ Modelové vstupy")
 
@@ -83,7 +95,7 @@ with c4:
     home = st.radio("Home", [1, 0], horizontal=True)
 
 # --------------------------------------------------
-# Výpočet predikce (1:1 podle Excelu)
+# Model
 # --------------------------------------------------
 def logistic(x):
     return 1 / (1 + np.exp(-x))
@@ -111,19 +123,19 @@ with c1:
     st.metric("Lineární skóre", f"{linear_score:.3f}")
 
 with c2:
-    st.metric("Pravděpodobnost výhry domácích", f"{p_win*100:.1f} %")
+    st.metric("Výhra domácích", f"{p_win*100:.1f} %")
 
 with c3:
-    st.metric("Pravděpodobnost výhry hostů", f"{(1-p_win)*100:.1f} %")
+    st.metric("Výhra hostů", f"{(1-p_win)*100:.1f} %")
 
 # --------------------------------------------------
 # Debug / transparentnost
 # --------------------------------------------------
 with st.expander("🧠 Detail výpočtu"):
-    st.write("Použité koeficienty:")
+    st.write("Koeficienty:")
     st.dataframe(params)
 
-    st.write("Použité hodnoty:")
+    st.write("Vstupy:")
     st.json({
         "Home": home,
         "xG_Diff": xg_diff,
