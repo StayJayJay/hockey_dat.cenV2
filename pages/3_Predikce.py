@@ -16,27 +16,28 @@ def load_data():
     base_path = Path(__file__).resolve().parent.parent
     file_path = base_path / "data" / "HOCKEY_LOGIC_PREDICTIONS.xlsx"
 
-    sheets = pd.read_excel(file_path, sheet_name=None)
+    params_raw = pd.read_excel(
+        file_path,
+        sheet_name="PARAMETRY",
+        header=1  # ← KLÍČOVÉ
+    )
 
-    return sheets["PARAMETRY"], sheets["CALC_TEAMS_SEASON"]
+    teams = pd.read_excel(
+        file_path,
+        sheet_name="CALC_TEAMS_SEASON"
+    )
 
-params_raw, teams = load_data()
-
-# ==================================================
-# NORMALIZACE LISTU PARAMETRY (SPRÁVNĚ)
-# ==================================================
-# vezmeme první 3 relevantní sloupce
-params_raw = params_raw.iloc[:, :3]
-params_raw.columns = ["Game_Type", "Parameter", "Coefficient"]
-
-# doplnění sekcí dolů (Regular Season / Play-off)
-params_raw["Game_Type"] = params_raw["Game_Type"].ffill()
-
-# odstranit řádky bez parametrů / koeficientů
+    return params_raw, teams
+# ==========================================
+# Normalizace PARAMETRY
+# ==========================================
+params_raw = params_raw.iloc[:, :4]
+params_raw.columns = ["Parameter", "Coefficient", "Source", "Note"]
 params_raw = params_raw.dropna(subset=["Parameter", "Coefficient"])
 
-# očistit názvy parametrů
 params_raw["Parameter"] = params_raw["Parameter"].astype(str).str.strip()
+
+params = params_raw.set_index("Parameter")["Coefficient"]
 
 # ==================================================
 # Výběr typu zápasu
