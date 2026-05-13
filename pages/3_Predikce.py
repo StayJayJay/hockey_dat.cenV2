@@ -47,9 +47,9 @@ game_type_excel = (
 
 params = (
     params_raw[params_raw["Game_Type"] == game_type_excel]
+    .assign(Parameter=lambda x: x["Parameter"].astype(str).str.strip())
     .set_index("Parameter")["Coefficient"]
 )
-
 # ==================================================
 # Výběr týmů
 # ==================================================
