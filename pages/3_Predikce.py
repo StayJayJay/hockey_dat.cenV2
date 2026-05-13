@@ -105,16 +105,22 @@ with c4:
 # ==================================================
 # Model
 # ==================================================
+def get_param(name, default=0.0):
+    if name not in params.index:
+        st.warning(f"Chybí parametr: {name}")
+        return default
+    return float(params[name])
+
 def logistic(x):
     return 1 / (1 + np.exp(-x))
 
 linear_score = (
-    params["Intercept"]
-    + home * params["Home"]
-    + xg_diff * params["xG_Diff"]
-    + pp_diff * params["PP_Diff"]
-    + goalie_rating * params["Goalie"]
-    + team_strength_diff * params["TeamStrength"]
+    get_param("Intercept")
+    + home * get_param("Home")
+    + xg_diff * get_param("xG_Diff")
+    + pp_diff * get_param("PP_Diff")
+    + goalie_rating * get_param("Goalie")
+    + team_strength_diff * get_param("TeamStrength")
 )
 
 p_win = logistic(linear_score)
