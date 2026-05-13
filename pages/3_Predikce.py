@@ -31,7 +31,7 @@ def load_data():
 # ==========================================
 # Normalizace PARAMETRY
 # ==========================================
-params_raw, teams = load_data
+params_raw, teams = load_data()
 params_raw = params_raw.iloc[:, :4]
 params_raw.columns = ["Parameter", "Coefficient", "Source", "Note"]
 params_raw = params_raw.dropna(subset=["Parameter", "Coefficient"])
