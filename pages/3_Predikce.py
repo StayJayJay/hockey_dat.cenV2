@@ -8,9 +8,9 @@ from pathlib import Path
 st.set_page_config(page_title="Predikce zápasu", layout="wide")
 st.title("🔮 Predikce zápasu – ELH")
 
-# --------------------------------------------------
+# ==================================================
 # Načtení dat
-# --------------------------------------------------
+# ==================================================
 @st.cache_data
 def load_data():
     base_path = Path(__file__).resolve().parent.parent
@@ -18,24 +18,23 @@ def load_data():
 
     sheets = pd.read_excel(file_path, sheet_name=None)
 
-    return {
-        "PARAMETRY": sheets["PARAMETRY"],
-        "TEAMS": sheets["CALC_TEAMS_SEASON"],
-    }
+    return sheets["PARAMETRY"], sheets["CALC_TEAMS_SEASON"]
 
-data = load_data()
+params_raw, teams = load_data()
 
-params_raw = data["PARAMETRY"].copy()
-teams = data["TEAMS"].copy()
+# ==================================================
+# NORMALIZACE LISTU PARAMETRY
+# ==================================================
+# Vezmeme pouze první 3 relevantní sloupce
+params_raw = params_raw.iloc[:, :3]
+params_raw.columns = ["Game_Type", "Parameter", "Coefficient"]
 
-# --------------------------------------------------
-# Normalizace PARAMETRY
-# --------------------------------------------------
-params_raw.columns = ["Game_Type", "Parameter", "Coefficient", "Source", "Note"]
+# odstranit prázdné řádky
+params_raw = params_raw.dropna(subset=["Parameter", "Coefficient"])
 
-# --------------------------------------------------
-# Volba typu zápasu
-# --------------------------------------------------
+# ==================================================
+# Výběr typu zápasu
+# ==================================================
 game_type_ui = st.radio(
     "Typ zápasu",
     ["Regular Season", "Play-off"],
@@ -51,9 +50,9 @@ params = (
     .set_index("Parameter")["Coefficient"]
 )
 
-# --------------------------------------------------
+# ==================================================
 # Výběr týmů
-# --------------------------------------------------
+# ==================================================
 teams_rs = teams[teams["Game Type"] == "RS"]
 
 team_list = sorted(teams_rs["Team"].unique())
@@ -64,7 +63,11 @@ with col1:
     home_team = st.selectbox("🏠 Domácí tým", team_list)
 
 with col2:
-    away_team = st.selectbox("✈️ Hosté", team_list, index=1)
+    away_team = st.selectbox(
+        "✈️ Hosté",
+        team_list,
+        index=1 if len(team_list) > 1 else 0
+    )
 
 def team_strength(team):
     return float(
@@ -75,9 +78,9 @@ team_strength_diff = (
     team_strength(home_team) - team_strength(away_team)
 )
 
-# --------------------------------------------------
-# Vstupní hodnoty (What‑if)
-# --------------------------------------------------
+# ==================================================
+# Vstupy modelu (What‑if)
+# ==================================================
 st.subheader("⚙️ Modelové vstupy")
 
 c1, c2, c3, c4 = st.columns(4)
@@ -94,9 +97,9 @@ with c3:
 with c4:
     home = st.radio("Home", [1, 0], horizontal=True)
 
-# --------------------------------------------------
+# ==================================================
 # Model
-# --------------------------------------------------
+# ==================================================
 def logistic(x):
     return 1 / (1 + np.exp(-x))
 
@@ -111,9 +114,9 @@ linear_score = (
 
 p_win = logistic(linear_score)
 
-# --------------------------------------------------
+# ==================================================
 # Výstup
-# --------------------------------------------------
+# ==================================================
 st.divider()
 st.subheader("📊 Výsledek predikce")
 
@@ -128,9 +131,9 @@ with c2:
 with c3:
     st.metric("Výhra hostů", f"{(1-p_win)*100:.1f} %")
 
-# --------------------------------------------------
-# Debug / transparentnost
-# --------------------------------------------------
+# ==================================================
+# Debug & transparentnost
+# ==================================================
 with st.expander("🧠 Detail výpočtu"):
     st.write("Koeficienty:")
     st.dataframe(params)
