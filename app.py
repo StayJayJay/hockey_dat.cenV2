@@ -25,10 +25,6 @@ with st.sidebar:
         - síla týmů  
         - predikce zápasů  
 
-        ---
-        **Model**
-        - lineární (logistic)
-        - koeficienty z Excelu
         """
     )
 
@@ -59,18 +55,18 @@ st.markdown(
     Vítej v analytické aplikaci **ELH**
 
     ---
-    ### 🧭 Co tady najdeš:
-    **📊 Statistiky**
+    ### Co tady najdeš:
+    **Statistiky**
     - zápasová data
     - přesilovky, oslabení
     - střely, xG, góly
 
-    **🏒 Týmy**
+    **Týmy**
     - Team Strength
     - PP / PK
     - forma a srovnání
 
-    **🔮 Predikce**
+    **Predikce**
     - přepínání RS / PO
     - What‑if analýza
     - transparentní výpočet P(Win)
@@ -84,10 +80,3 @@ st.markdown(
 # ==================================================
 # with st.expander("📂 Načtené listy z Excelu"):
 #    st.write(list(sheets.keys()))
-
-st.markdown(
-    """
-    ---
-    👉 **Použij navigaci vlevo** pro přechod na konkrétní část aplikace.
-    """
-)
