@@ -54,31 +54,28 @@ def get_param(name, default=0.0):
 def logistic(x):
     return 1 / (1 + np.exp(-x))
 
+def safe_val(x):
+    if pd.isna(x):
+        return 0
+    return x
+
 def predict(row):
     score = (
         get_param("Intercept")
-        + row.get("Home", 0) * get_param("Home")
-        + row.get("xG_Diff_adj", 0) * get_param("xG_Diff")
-        + row.get("PP_Diff", 0) * get_param("PP_Diff")
-        + row.get("Goalie_rating", 0) * get_param("Goalie")
-        + row.get("Team_strength", 0) * get_param("TeamStrength")
+        + safe_val(row.get("Home")) * get_param("Home")
+        + safe_val(row.get("xG_Diff_adj")) * get_param("xG_Diff")
+        + safe_val(row.get("PP_Diff")) * get_param("PP_Diff")
+        + safe_val(row.get("Goalie_rating")) * get_param("Goalie")
+        + safe_val(row.get("Team_strength")) * get_param("TeamStrength")
     )
     return logistic(score)
 
 # ==================================================
 # Predikce na historických datech
 # ==================================================
-st.subheader("🔍 Debug NaN")
-
-st.write("NaN v P_pred:", df["P_pred"].isna().sum())
-st.write("NaN ve Win:", df["Win"].isna().sum())
 
 df["P_pred"] = df.apply(predict, axis=1)
 
-st.subheader("🔍 Debug NaN")
-
-st.write("NaN v P_pred:", df["P_pred"].isna().sum())
-st.write("NaN ve Win:", df["Win"].isna().sum())
 # ==================================================
 # ČIŠTĚNÍ DAT (správné)
 # ==================================================
@@ -109,7 +106,8 @@ df["Predicted_Class"] = (df["P_pred"] > 0.5).astype(int)
 accuracy = (df["Predicted_Class"] == df["Win"]).mean()
 
 # Brier score
-brier = np.mean((df["P_pred"] - df["Win"]) ** 2)
+df_clean = df.dropna(subset=["P_pred", "Win"])
+brier = np.mean((df_clean["P_pred"] - df_clean["Win"]) ** 2)
 
 # ==================================================
 # OUTPUT
