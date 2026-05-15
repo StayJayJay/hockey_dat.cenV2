@@ -148,3 +148,12 @@ elif diff_xG < 0:
     st.warning(f"{team_b} má vyšší průměrný xG diff o {abs(diff_xG):.2f}")
 else:
     st.info("Týmy mají stejný průměrný rozdíl xG")
+
+diff_PP = ta["avg_PP_Rate"] - tb["avg_PP_Rate"]
+
+diff_PP > 0:
+    st.success(f"{team_a} má vyšší průměr PP o {diff_PP:.2f}")
+elif diff < 0:
+    st.warning(f"{team_b} má vyšší průměr PP o {diff_PP:.2f}")
+else:
+    st.info("Týmy mají stejný průměr využitých PP")
