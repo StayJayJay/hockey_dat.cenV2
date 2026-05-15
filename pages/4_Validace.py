@@ -80,6 +80,28 @@ df = df.dropna(subset=[
 df["P_pred"] = df.apply(predict, axis=1)
 
 # ==================================================
+# BEZPEČNÉ ČIŠTĚNÍ DAT
+# ==================================================
+required_cols = [
+    "Home",
+    "xG_Diff_adj",
+    "PP_Diff",
+    "Goalie_rating",
+    "Team_strength",
+    "Win"
+]
+
+# ponech jen sloupce, které existují
+existing_cols = [col for col in required_cols if col in df.columns]
+
+st.write("Použité sloupce:", existing_cols)
+
+# dropni jen ty, co existují
+df = df.dropna(subset=existing_cols)
+
+st.write("Počet řádků po čištění:", len(df))
+
+# ==================================================
 # METRIKY
 # ==================================================
 
@@ -112,8 +134,18 @@ st.bar_chart(
     df["P_pred"]
 )
 
+if df.empty:
+    st.error("❌ Žádná data pro validaci – zkontroluj MODEL_INPUT sheet")
+    st.stop()
+
 # ==================================================
 # DEBUG DATA
 # ==================================================
 with st.expander("📋 Data sample"):
     st.dataframe(df.head())
+
+st.subheader("🔍 Debug – sloupce v datasetu")
+st.write(df.columns.tolist())
+
+st.subheader("🔍 Počet řádků před filtrem")
+st.write(len(df))
