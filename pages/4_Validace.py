@@ -309,3 +309,62 @@ with st.expander("📋 Data sample"):
 
 #st.subheader("🔍 Počet řádků před filtrem")
 #st.write(len(df))
+
+#================================================================================================================
+#================================================================================================================
+#================================================================================================================
+#================================================================================================================
+
+# ==================================================
+# ML MODEL (Logistic Regression)
+# ==================================================
+try:
+    from sklearn.linear_model import LogisticRegression
+
+    st.subheader("🤖 ML model")
+
+    # --- feature engineering ---
+    df_ml = df.copy()
+
+    df_ml["quality"] = df_ml["xG_Diff_adj"]
+    mask = df_ml["quality"].isna() | (df_ml["quality"] == 0)
+    df_ml.loc[mask, "quality"] = df_ml["Shots_Diff"] * 0.1
+
+    features = ["Home", "PP_Diff", "Goalie_rating", "Team_strength", "quality"]
+
+    # split stejné jako výš
+    df_ml_shuffled = df_ml.sample(frac=1, random_state=42).reset_index(drop=True)
+    split_index = int(len(df_ml_shuffled) * 0.7)
+
+    df_ml_train = df_ml_shuffled.iloc[:split_index]
+    df_ml_test = df_ml_shuffled.iloc[split_index:]
+
+    X_train = df_ml_train[features]
+    y_train = df_ml_train["Win"]
+
+    X_test = df_ml_test[features]
+    y_test = df_ml_test["Win"]
+
+    # --- model ---
+    model = LogisticRegression(max_iter=1000)
+    model.fit(X_train, y_train)
+
+    # --- predikce ---
+    df_ml_test["P_pred_ml"] = model.predict_proba(X_test)[:, 1]
+    df_ml_test["Predicted_Class_ml"] = (df_ml_test["P_pred_ml"] > 0.5).astype(int)
+
+    # --- metriky ---
+    accuracy_ml = (df_ml_test["Predicted_Class_ml"] == y_test).mean()
+    brier_ml = np.mean((df_ml_test["P_pred_ml"] - y_test) ** 2)
+
+    # --- output ---
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("ML Accuracy", f"{accuracy_ml*100:.1f} %")
+
+    with col2:
+        st.metric("ML Brier", f"{brier_ml:.4f}")
+
+except ImportError:
+    st.warning(" scikit-learn není nainstalovaný (přidej do requirements.txt)")
