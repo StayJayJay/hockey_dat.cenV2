@@ -1,79 +1,108 @@
+# -*- coding: utf-8 -*-
+
 import streamlit as st
 import pandas as pd
+from pathlib import Path
 
-st.set_page_config(page_title="Statistiky", layout="wide")
-st.title("Statistiky zápasů – ELH")
+st.set_page_config(page_title="Statistiky týmů", layout="wide")
+st.title("📊 Statistiky týmů")
 
-# --------------------------------------------------
-# Načtení dat
-# --------------------------------------------------
+# ==================================================
+# LOAD DATA
+# ==================================================
 @st.cache_data
 def load_data():
-    xls = pd.ExcelFile("data/HOCKEY_LOGIC_PREDICTIONS.xlsx")
-    return pd.read_excel(xls, "CALC_GAMES_BASE")
+    base_path = Path(__file__).resolve().parent.parent
+    file_path = base_path / "data" / "HOCKEY_LOGIC_PREDICTIONS.xlsx"
+    return pd.read_excel(file_path, sheet_name="MODEL_INPUT")
 
 df = load_data()
 
-# --------------------------------------------------
-# Filtry
-# --------------------------------------------------
-with st.sidebar:
-    st.header("🎛️ Filtry")
-    season = st.selectbox("Sezóna", sorted(df["Season"].unique()))
-    game_type = st.multiselect(
-        "Typ zápasu",
-        df["Game_Type"].unique(),
-        default=df["Game_Type"].unique()
-    )
+# ==================================================
+# FEATURE ENGINEERING (jen základní)
+# ==================================================
+df = df.sort_values("Date")
 
-df = df[
-    (df["Season"] == season) &
-    (df["Game_Type"].isin(game_type))
-]
-
-# --------------------------------------------------
-# Rychlé metriky
-# --------------------------------------------------
-c1, c2, c3, c4 = st.columns(4)
-
-with c1:
-    st.metric("Zápasy", len(df))
-
-with c2:
-    st.metric("Góly / zápas", f"{df['Goals_For'].mean():.2f}")
-
-with c3:
-    st.metric("xG / zápas", f"{df['xG_For'].mean():.2f}")
-
-with c4:
-    st.metric("PP %", f"{df['PP_Eff'].mean()*100:.1f} %")
-
-# --------------------------------------------------
-# Přesilovky – týmově
-# --------------------------------------------------
-st.subheader("⚡ Přesilovky – týmové")
-
-pp = (
-    df.groupby("Team")[["PP_O", "PP_G"]]
-    .sum()
+df["Team_form"] = (
+    df.groupby("Team")["Win"]
+    .rolling(5, min_periods=1)
+    .mean()
+    .reset_index(level=0, drop=True)
 )
 
-pp["PP_%"] = pp["PP_G"] / pp["PP_O"]
-pp = pp.sort_values("PP_%", ascending=False)
+# ==================================================
+# UI – výběr týmu
+# ==================================================
+team = st.selectbox("Vyber tým", sorted(df["Team"].unique()))
+
+team_df = df[df["Team"] == team].copy()
+
+if team_df.empty:
+    st.warning("Žádná data pro tento tým")
+    st.stop()
+
+# ==================================================
+# ZÁKLADNÍ METRIKY
+# ==================================================
+st.subheader("📊 Přehled")
+
+win_rate = team_df["Win"].mean()
+avg_xg = team_df["xG_Diff_adj"].mean()
+avg_pp = team_df["PP_Diff"].mean()
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric("✅ Win rate", f"{win_rate*100:.1f}%")
+col2.metric("⚡ Avg xG diff", f"{avg_xg:.2f}")
+col3.metric("🔥 PP diff", f"{avg_pp:.2f}")
+
+# ==================================================
+# FORMA V ČASE
+# ==================================================
+st.subheader("📈 Forma týmu (poslední zápasy)")
+
+st.line_chart(team_df.set_index("Date")["Team_form"])
+
+# ==================================================
+# POSLEDNÍ ZÁPASY
+# ==================================================
+st.subheader("📅 Poslední zápasy")
 
 st.dataframe(
-    pp.style.format({"PP_%": "{:.1%}"}),
-    use_container_width=True
+    team_df.tail(10)[
+        ["Date", "Opponent", "Win", "Team_form"]
+    ]
 )
 
-st.bar_chart(pp["PP_%"])
+# ==================================================
+# HOME vs AWAY
+# ==================================================
+st.subheader("🏠 Home vs Away")
 
-# --------------------------------------------------
-# Detail zápasů
-# --------------------------------------------------
-st.subheader("📋 Detail zápasů")
+home_games = team_df[team_df["Home"] == 1]["Win"].mean()
+away_games = team_df[team_df["Home"] == 0]["Win"].mean()
 
-st.dataframe(
-    df.sort_values("Date", ascending=False),
-    use_container_width=True
-)
+col1, col2 = st.columns(2)
+col1.metric("🏠 Home win rate", f"{home_games*100:.1f}%")
+col2.metric("✈️ Away win rate", f"{away_games*100:.1f}%")
+
+# ==================================================
+# DISTRIBUCE VÝSLEDKŮ
+# ==================================================
+st.subheader("📊 Distribuce výsledků")
+
+st.bar_chart(team_df["Win"])
+
+# ==================================================
+# SILNÁ / SLABÁ STRÁNKA
+# ==================================================
+st.subheader("🧠 Insight")
+
+latest_form = team_df["Team_form"].iloc[-1]
+
+if latest_form > 0.7:
+    st.success("🔥 Tým je ve výborné formě")
+elif latest_form > 0.55:
+    st.info("✅ Tým je ve solidní formě")
+else:
+    st.warning("⚠️ Tým je ve slabší formě")
