@@ -54,7 +54,8 @@ features = [
     "Team_strength",
     "quality",
     "Team_form",
-    "Opponent_form"
+    "Opponent_form",
+    "H2H_form"
 ]
 
 X = df[features]
@@ -62,6 +63,38 @@ y = df["Win"]
 
 model = LogisticRegression(max_iter=1000)
 model.fit(X, y)
+
+# ==================================================
+# HEAD-TO-HEAD FORM (last 3 games)
+# ==================================================
+def get_h2h_form(team, opponent, n_games=3):
+    
+    # vyfiltruj vzájemné zápasy
+    h2h = df[
+        ((df["Team"] == team) & (df["Opponent"] == opponent)) |
+        ((df["Team"] == opponent) & (df["Opponent"] == team))
+    ].sort_values("Date")
+
+    if len(h2h) == 0:
+        return 0.5
+
+    # vezmi poslední n zápasů
+    h2h_last = h2h.tail(n_games)
+
+    # přepočti z pohledu teamu
+    wins = 0
+    total = 0
+
+    for _, row in h2h_last.iterrows():
+        if row["Team"] == team:
+            wins += row["Win"]
+        else:
+            # když je team "Opponent", musíš invertovat Win
+            wins += (1 - row["Win"])
+        
+        total += 1
+
+    return wins / total if total > 0 else 0.5
 
 # ==================================================
 # UI INPUT
@@ -84,6 +117,13 @@ opp_form = df[df["Team"] == opponent]["Team_form"].iloc[-1]
 # quality fallback (zadáš xG nebo jen použij default)
 quality = st.number_input("xG Diff (nebo 0)", value=0.0)
 
+team_data = get_latest_team_data(team)
+opp_data = get_latest_team_data(opponent)
+
+h2h_form = get_h2h_form(team, opponent)
+
+st.write(f"🔥 H2H poslední 3 zápasy: {h2h_form:.2f}")
+
 # ==================================================
 # PREDIKCE
 # ==================================================
@@ -97,6 +137,7 @@ if st.button("Spočítat predikci"):
         "quality": quality,
         "Team_form": team_form,
         "Opponent_form": opp_form
+        "H2H_form": h2h_form
     }])
 
     prob = model.predict_proba(X_input)[0][1]
