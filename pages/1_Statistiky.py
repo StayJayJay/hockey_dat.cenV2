@@ -100,7 +100,7 @@ form_plot = pd.concat([
 # 👉 seřaď podle data
 form_plot = form_plot.sort_index()
 
-st.line_chart(form_plot,color="red")
+st.line_chart(form_plot,color=["blue","red"])
 # ==================================================
 # 📉 TREND FORMY
 # ==================================================
