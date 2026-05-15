@@ -131,16 +131,6 @@ st.dataframe(comparison, use_container_width=True)
 # --------------------------------------------------
 # Shrnutí
 # --------------------------------------------------
-diff_TeamStrength = ta["Team_Strength"] - tb["Team_Strength"]
-
-if diff_TeamStrength > 0:
-    st.success(f"{team_a} má vyšší Team Strength o {diff_TeamStrength:.2f}")
-elif diff_TeamStrength < 0:
-    st.warning(f"{team_b} má vyšší Team Strength o {abs(diff_TeamStrength):.2f}")
-else:
-    st.info("Týmy mají stejnou Team Strength")
-
-# ---------------------------------------------------
 
 diff_xG = ta["avg_xG_Diff"] - tb["avg_xG_Diff"]
 
@@ -156,8 +146,19 @@ else:
 diff_PP_rate = ta["avg_PP_Rate"] - tb["avg_PP_Rate"]
 
 if diff_PP_rate > 0:
-    st.success(f"{team_a} má vyšší průměrné využití o {diff_PP_rate:.2f}")
+    st.success(f"{team_a} má vyšší průměrné využití PP o {diff_PP_rate:.2f}")
 elif diff_PP_rate < 0:
-    st.warning(f"{team_b} má vyšší průměrné využití o {abs(diff_PP_rate):.2f}")
+    st.warning(f"{team_b} má vyšší průměrné využití PP o {abs(diff_PP_rate):.2f}")
 else:
     st.info("Týmy mají stejné průměrné využití PP")
+
+# ---------------------------------------------------
+
+diff_TeamStrength = ta["Team_Strength"] - tb["Team_Strength"]
+
+if diff_TeamStrength > 0:
+    st.success(f"{team_a} má vyšší Team Strength o {diff_TeamStrength:.2f}")
+elif diff_TeamStrength < 0:
+    st.warning(f"{team_b} má vyšší Team Strength o {abs(diff_TeamStrength):.2f}")
+else:
+    st.info("Týmy mají stejnou Team Strength")
