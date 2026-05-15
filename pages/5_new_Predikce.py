@@ -188,6 +188,7 @@ h2h_form = get_h2h_form(team, opponent)
 
 st.write(f"🔥 H2H poslední 3 zápasy: {h2h_form:.2f}")
 
+
 # ==================================================
 # PREDIKCE
 # ==================================================
@@ -230,11 +231,24 @@ st.write(f"📊 Forma soupeře: {opp_form:.2f}")
 st.write(f"🔥 H2H: {h2h_form:.2f}")
 st.write(f"⚡ PP diff: {pp:.2f}")
 
-odds = st.number_input("Kurz", value=2.0)
+odds = st.number_input("Kurz (např. 1.90)", value=2.0)
+implied_prob = 1 / odds
+prob_calibrated = 0.5 + (prob - 0.5) * 0.6
 
-implied = 1 / odds
+st.subheader("💰 Value analýza")
 
-if prob_calibrated > implied:
-    st.success("💰 VALUE BET")
+st.write(f"📊 Model pravděpodobnost: {prob_calibrated*100:.1f} %")
+st.write(f"📊 Implied (kurz): {implied_prob*100:.1f} %")
+
+edge = prob_calibrated - implied_prob
+
+if edge > 0.05:
+    st.success(f"💰 VALUE BET (+{edge*100:.1f} % edge)")
+elif edge > 0:
+    st.info(f"✅ Malá value (+{edge*100:.1f} %)")
 else:
-    st.warning("❌ No value")
+    st.error(f"❌ No value ({edge*100:.1f} %)")
+
+ev = (prob_calibrated * odds) - 1
+
+st.write(f"📈 Expected Value (EV): {ev:.2f}")
