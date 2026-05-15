@@ -45,7 +45,7 @@ params = params_raw.set_index("Parameter")["Coefficient"]
 # ==================================================
 game_type_ui = st.radio(
     "Typ zápasu",
-    ["Regular Season", "Play-off"],
+    ["Regular Season"],
     horizontal=True
 )
 
