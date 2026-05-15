@@ -62,6 +62,64 @@ def safe_val(x):
         return 0
     return x
 
+# ==================================================
+# AUTO-TUNING SCALE (rychlá grid search)
+# ==================================================
+def tune_scaling(df_sample):
+
+    best_score = 999
+    best_params = None
+
+    # testované kombinace
+    xg_scales = [0.1, 0.15, 0.2]
+    pp_scales = [2, 3, 4]
+    goalie_scales = [15, 25, 35]
+
+    for xg_s in xg_scales:
+        for pp_s in pp_scales:
+            for g_s in goalie_scales:
+
+                preds = []
+
+                for _, row in df_sample.iterrows():
+
+                    xg_raw = row.get("xG_Diff_adj")
+                    shots = safe_val(row.get("Shots_Diff"))
+
+                    if pd.notna(xg_raw) and abs(xg_raw) > 0:
+                        quality = xg_raw
+                        weight = 1.0
+                    else:
+                        quality = shots * 0.1
+                        weight = 0.6
+
+                    score = (
+                        get_param("Intercept")
+                        + safe_val(row.get("Home")) * get_param("Home")
+                        + (quality * xg_s) * get_param("xG_Diff") * weight
+                        + safe_val(row.get("PP_Diff")) * pp_s * get_param("PP_Diff")
+                        + safe_val(row.get("Goalie_rating")) * g_s * get_param("Goalie")
+                        + safe_val(row.get("Team_strength")) * get_param("TeamStrength")
+                    )
+
+                    p = logistic(score)
+                    p = 0.5 + (p - 0.5) * 0.6
+
+                    preds.append(p)
+
+                # Brier score
+                brier = np.mean((np.array(preds) - df_sample["Win"])**2)
+
+                if brier < best_score:
+                    best_score = brier
+                    best_params = (xg_s, pp_s, g_s)
+
+    return best_params
+
+best_xg, best_pp, best_goalie = tune_scaling(df.sample(200))
+
+st.write("Best scaling:")
+st.write("xG:", best_xg, "PP:", best_pp, "Goalie:", best_goalie)
 
 # ==================================================
 # Model s xG / Shots fallback + scaling
