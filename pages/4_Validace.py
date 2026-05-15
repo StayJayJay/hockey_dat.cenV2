@@ -241,8 +241,8 @@ df[existing_cols] = df[existing_cols].fillna(0)
 # ==================================================
 
 # Accuracy
-df["Predicted_Class"] = (df["P_pred"] > 0.5).astype(int)
-accuracy = (df["Predicted_Class"] == df["Win"]).mean()
+df_test["Predicted_Class"] = (df_test["P_pred"] > 0.5).astype(int)
+accuracy = (df_test["Predicted_Class"] == df_test["Win"]).mean()
 
 # Brier score
 df_clean = df_test.dropna(subset=["P_pred", "Win"])
