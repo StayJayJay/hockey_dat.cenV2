@@ -134,6 +134,29 @@ linear_score = (
     + team_strength_diff * get_param("TeamStrength")
 )
 
+# ==================================================
+# ROZKLAD PREDIKCE (components)
+# ==================================================
+
+components = {
+    "Intercept": get_param("Intercept"),
+    "Home": home * get_param("Home"),
+    "xG Diff": xg_diff * get_param("xG_Diff"),
+    "PP Diff": pp_diff * get_param("PP_Diff"),
+    "Goalie": goalie_rating * get_param("Goalie"),
+    "Team Strength": team_strength_diff * get_param("TeamStrength"),
+}
+
+st.subheader("🧠 Rozklad predikce")
+
+col1, col2, col3 = st.columns(3)
+
+cols = [col1, col2, col3]
+for i, (k, v) in enumerate(components.items()):
+    cols[i % 3].metric(k, f"{v:+.3f}")
+
+st.write("**Součet komponent:**", round(sum(components.values()), 3))
+
 p_win = logistic(linear_score)
 
 # ==================================================
