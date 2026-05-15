@@ -188,6 +188,54 @@ h2h_form = get_h2h_form(team, opponent)
 
 st.write(f"🔥 H2H poslední 3 zápasy: {h2h_form:.2f}")
 
+# ==================================================
+# Batch
+# ==================================================
+
+st.subheader("🚀 Batch predikce (celé kolo)")
+
+df_today = df.tail(20)  # jednoduchý starting point
+
+results = []
+
+for _, row in df_today.iterrows():
+
+    X_row = pd.DataFrame([{
+        "Home": row["Home"],
+        "PP_Diff": row["PP_Diff"],
+        "Goalie_rating": row["Goalie_rating"],
+        "Team_strength": row["Team_strength"],
+        "quality": row["quality"],
+        "Team_form": row["Team_form"],
+        "Opponent_form": row["Opponent_form"],
+        "H2H_form": row["H2H_form"]
+    }])
+
+    prob = model.predict_proba(X_row)[0][1]
+
+    # ✅ kalibrace
+    prob_cal = 0.5 + (prob - 0.5) * 0.6
+
+    # ✅ kurz (zatím fake, později napojíš real odds)
+    odds = 2.0
+
+    implied = 1 / odds
+    edge = prob_cal - implied
+    ev = (prob_cal * odds) - 1
+
+    results.append({
+        "Team": row["Team"],
+        "Opponent": row["Opponent"],
+        "Prob": prob_cal,
+        "Odds": odds,
+        "Edge": edge,
+        "EV": ev
+    })
+
+df_results = pd.DataFrame(results)
+df_value = df_results[df_results["Edge"] > 0.05]
+df_value = df_value.sort_values("Edge", ascending=False)
+
 
 # ==================================================
 # PREDIKCE
@@ -252,3 +300,21 @@ else:
 ev = (prob_calibrated * odds) - 1
 
 st.write(f"📈 Expected Value (EV): {ev:.2f}")
+
+st.subheader("💰 Nejlepší zápasy (VALUE)")
+
+st.dataframe(
+    df_value[["Team", "Opponent", "Prob", "Odds", "Edge", "EV"]]
+    .style.format({
+        "Prob": "{:.2%}",
+        "Edge": "{:.2%}",
+        "EV": "{:.2f}"
+    })
+)
+
+def highlight(row):
+    if row.Edge > 0.1:
+        return ["background-color: lightgreen"] * len(row)
+    return [""] * len(row)
+
+st.dataframe(df_value.style.apply(highlight, axis=1))
