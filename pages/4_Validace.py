@@ -315,13 +315,38 @@ with st.expander("📋 Data sample"):
 #================================================================================================================
 #================================================================================================================
 
+#Seřazení podle datumu
+df = df.sort_values(by="Date")
+
+# ==================================================
+# TEAM FORM (last 5 games)
+# ==================================================
+df["Team_form"] = (
+    df.groupby("Team")["Win"]
+    .rolling(5, min_periods=1)
+    .mean()
+    .reset_index(level=0, drop=True)
+)
+# vytvoř pomocnou tabulku
+team_form_lookup = df[["Team", "Date", "Team_form"]].copy()
+team_form_lookup.columns = ["Opponent", "Date", "Opponent_form"]
+
+# merge zpátky podle soupeře a času
+df = df.merge(
+    team_form_lookup,
+    on=["Opponent", "Date"],
+    how="left"
+)
+
+
+
 # ==================================================
 # ML MODEL (Logistic Regression)
 # ==================================================
 try:
     from sklearn.linear_model import LogisticRegression
 
-    st.subheader("🤖 ML model")
+    st.subheader("ML model")
 
     # --- feature engineering ---
     df_ml = df.copy()
@@ -330,7 +355,7 @@ try:
     mask = df_ml["quality"].isna() | (df_ml["quality"] == 0)
     df_ml.loc[mask, "quality"] = df_ml["Shots_Diff"] * 0.1
 
-    features = ["Home", "PP_Diff", "Goalie_rating", "Team_strength", "quality"]
+    features = ["Home","PP_Diff","Goalie_rating","Team_strength","quality","Team_form","Opponent_form"]
 
     # split stejné jako výš
     df_ml_shuffled = df_ml.sample(frac=1, random_state=42).reset_index(drop=True)
