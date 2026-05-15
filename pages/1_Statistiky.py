@@ -57,11 +57,47 @@ col2.metric("⚡ Avg xG diff", f"{avg_xg:.2f}")
 col3.metric("🔥 PP diff", f"{avg_pp:.2f}")
 
 # ==================================================
+# ⚔️ POROVNÁNÍ TEAM vs OPPONENT
+# ==================================================
+st.subheader("⚔️ Porovnání týmů")
+
+opponent = st.selectbox("Vyber soupeře", sorted(df["Team"].unique()))
+
+opp_df = df[df["Team"] == opponent]
+
+if not opp_df.empty:
+
+    col1, col2 = st.columns(2)
+
+    col1.write(f"### {team}")
+    col1.write(f"Forma: {team_df['Team_form'].iloc[-1]:.2f}")
+    col1.write(f"Win rate: {team_df['Win'].mean():.2%}")
+
+    col2.write(f"### {opponent}")
+    col2.write(f"Forma: {opp_df['Team_form'].iloc[-1]:.2f}")
+    col2.write(f"Win rate: {opp_df['Win'].mean():.2%}")
+
+
+# ==================================================
 # FORMA V ČASE
 # ==================================================
 st.subheader("📈 Forma týmu (poslední zápasy)")
 
 st.line_chart(team_df.set_index("Date")["Team_form"])
+
+# ==================================================
+# 📉 TREND FORMY
+# ==================================================
+st.subheader("📉 Trend formy")
+
+recent_form = team_df["Win"].tail(5).mean()
+season_form = team_df["Win"].mean()
+
+if recent_form > season_form:
+    st.success("📈 Tým se zlepšuje")
+else:
+    st.warning("📉 Tým se zhoršuje")
+
 
 # ==================================================
 # POSLEDNÍ ZÁPASY
@@ -106,3 +142,14 @@ elif latest_form > 0.55:
     st.info("✅ Tým je ve solidní formě")
 else:
     st.warning("⚠️ Tým je ve slabší formě")
+
+# ==================================================
+# 🏆 TOP TÝMY
+# ==================================================
+st.subheader("🏆 Top týmy")
+
+leaderboard = df.groupby("Team")["Win"].mean().sort_values(ascending=False)
+
+st.dataframe(
+    leaderboard.reset_index().rename(columns={"Win": "Win rate"})
+)
