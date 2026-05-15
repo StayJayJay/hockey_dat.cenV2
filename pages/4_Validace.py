@@ -38,7 +38,7 @@ df, params_raw = load_data()
 params_raw = params_raw.iloc[:, :4]
 params_raw.columns = ["Parameter", "Coefficient", "Source", "Note"]
 params_raw = params_raw.dropna(subset=["Parameter", "Coefficient"])
-#params_raw["Parameter"] = params_raw["Parameter"].astype(str).str.strip()
+params_raw["Parameter"] = params_raw["Parameter"].astype(str).str.strip()
 
 params = params_raw.set_index("Parameter")["Coefficient"]
 
@@ -155,12 +155,12 @@ existing_cols = [col for col in required_cols if col in df.columns]
 # 🔑 místo dropna → doplníme chybějící hodnoty
 df[existing_cols] = df[existing_cols].fillna(0)
 
-st.write("Použité sloupce:", existing_cols)
-st.write("Počet řádků po čištění:", len(df))
-st.write("Min prob:", df["P_pred"].min())
-st.write("Max prob:", df["P_pred"].max())
-st.write("Podíl xG vs Shots:")
-st.write((df["xG_Diff_adj"] != 0).mean())
+#st.write("Použité sloupce:", existing_cols)
+#st.write("Počet řádků po čištění:", len(df))
+#st.write("Min prob:", df["P_pred"].min())
+#st.write("Max prob:", df["P_pred"].max())
+#st.write("Podíl xG vs Shots:")
+#st.write((df["xG_Diff_adj"] != 0).mean())
 
 # ==================================================
 # METRIKY
@@ -230,8 +230,8 @@ if df.empty:
 with st.expander("📋 Data sample"):
     st.dataframe(df.head())
 
-st.subheader("🔍 Debug – sloupce v datasetu")
-st.write(df.columns.tolist())
+#st.subheader("🔍 Debug – sloupce v datasetu")
+#st.write(df.columns.tolist())
 
-st.subheader("🔍 Počet řádků před filtrem")
-st.write(len(df))
+#st.subheader("🔍 Počet řádků před filtrem")
+#st.write(len(df))
