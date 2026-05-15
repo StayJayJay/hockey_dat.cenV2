@@ -194,7 +194,13 @@ st.write(f"🔥 H2H poslední 3 zápasy: {h2h_form:.2f}")
 
 st.subheader("🚀 Batch predikce (celé kolo)")
 
-df_today = df.tail(20)  # jednoduchý starting point
+today = pd.Timestamp.today().normalize()
+df_today = df[df["Date"] == today]
+
+if df_today.empty:
+    st.warning("⚠️ Dnes nejsou žádné zápasy v datasetu")
+    st.stop()
+
 
 results = []
 
