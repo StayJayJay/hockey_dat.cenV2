@@ -68,19 +68,11 @@ def predict(row):
 # ==================================================
 # Predikce na historických datech
 # ==================================================
-df = df.dropna(subset=[
-    "Home",
-    "xG_Diff_adj",
-    "PP_Diff",
-    "Goalie_rating",
-    "Team_strength",
-    "Win"
-])
 
 df["P_pred"] = df.apply(predict, axis=1)
 
 # ==================================================
-# BEZPEČNÉ ČIŠTĚNÍ DAT
+# ČIŠTĚNÍ DAT (správné)
 # ==================================================
 required_cols = [
     "Home",
@@ -91,15 +83,13 @@ required_cols = [
     "Win"
 ]
 
-# ponech jen sloupce, které existují
+# nech jen existující sloupce
 existing_cols = [col for col in required_cols if col in df.columns]
 
-st.write("Použité sloupce:", existing_cols)
-
-# místo dropna
+# 🔑 místo dropna → doplníme chybějící hodnoty
 df[existing_cols] = df[existing_cols].fillna(0)
 
-
+st.write("Použité sloupce:", existing_cols)
 st.write("Počet řádků po čištění:", len(df))
 
 # ==================================================
