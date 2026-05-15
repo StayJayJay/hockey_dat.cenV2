@@ -140,6 +140,8 @@ elif diff_TeamStrength < 0:
 else:
     st.info("Týmy mají stejnou Team Strength")
 
+# ---------------------------------------------------
+
 diff_xG = ta["avg_xG_Diff"] - tb["avg_xG_Diff"]
 
 if diff_xG > 0:
@@ -149,11 +151,13 @@ elif diff_xG < 0:
 else:
     st.info("Týmy mají stejný průměrný rozdíl xG")
 
+# -----------------------------------------------------
+
 diff_PP = ta["avg_PP_Rate"] - tb["avg_PP_Rate"]
 
 diff_PP > 0:
     st.success(f"{team_a} má vyšší průměr PP o {diff_PP:.2f}")
-elif diff < 0:
+elif diff_PP < 0:
     st.warning(f"{team_b} má vyšší průměr PP o {diff_PP:.2f}")
 else:
     st.info("Týmy mají stejný průměr využitých PP")
