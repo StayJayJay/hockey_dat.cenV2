@@ -265,14 +265,6 @@ prob_calibrated = 0.5 + (prob - 0.5) * 0.6
 
 st.metric("📊 Pravděpodobnost výhry", f"{prob_calibrated*100:.1f} %")
 
-if prob > 0.65:
-    st.success("🔥 Strong pick")
-elif prob > 0.55:
-    st.info("✅ Slight advantage")
-else:
-    st.warning("⚖️ No clear edge")
-
-
 if team_form > opp_form:
     st.success("✅ Tým je ve lepší formě")
 else:
