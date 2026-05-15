@@ -291,7 +291,7 @@ with col2:
 st.subheader("📊 Distribuce predikcí")
 
 st.bar_chart(
-    df["P_pred"]
+    df_test["P_pred"]
 )
 
 if df.empty:
