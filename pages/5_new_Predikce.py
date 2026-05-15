@@ -206,7 +206,7 @@ st.write(f"🔥 H2H poslední 3 zápasy: {h2h_form:.2f}")
     prob = model.predict_proba(X_input)[0][1]
 
     st.metric("📊 Pravděpodobnost výhry", f"{prob*100:.1f} %")
-    if prob > 0.65:
+if prob > 0.65:
     st.success("🔥 Strong pick")
 elif prob > 0.55:
     st.info("✅ Slight advantage")
