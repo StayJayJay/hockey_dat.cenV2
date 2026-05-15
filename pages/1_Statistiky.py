@@ -97,8 +97,8 @@ form_plot = pd.concat([
     opp_plot.rename("Soupeř")
 ], axis=1)
 
-# 👉 seřaď podle data
-form_plot = form_plot.sort_index()
+#doplnění dnů kdy nehráli ve stejný den + seřazení
+form_plot = form_plot.sort_index().ffill()
 
 st.line_chart(form_plot,color=["blue","red"])
 # ==================================================
