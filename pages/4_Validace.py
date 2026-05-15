@@ -54,22 +54,56 @@ def get_param(name, default=0.0):
 def logistic(x):
     return 1 / (1 + np.exp(-x))
 
+# ==================================================
+# Scaling helper
+# ==================================================
 def safe_val(x):
     if pd.isna(x):
         return 0
     return x
 
+
+# ==================================================
+# Model s optimalizovaným scalingem
+# ==================================================
 def predict(row):
+    # --- RAW vstupy ---
+    home = safe_val(row.get("Home"))
+    xg = safe_val(row.get("xG_Diff_adj"))
+    pp = safe_val(row.get("PP_Diff"))
+    goalie = safe_val(row.get("Goalie_rating"))
+    strength = safe_val(row.get("Team_strength"))
+
+    # ==================================================
+    # 🔥 SCALE FIX (KLÍČOVÉ)
+    # ==================================================
+
+    # xG 
+    xg_scaled = xg * 0.25
+
+    # PP 
+    pp_scaled = pp * 6
+
+    # Goalie
+    goalie_scaled = goalie * 60
+
+    # Team strength
+    strength_scaled = strength
+
+    # ==================================================
+    # Výpočet score
+    # ==================================================
     score = (
         get_param("Intercept")
-        + safe_val(row.get("Home")) * get_param("Home")
-        + safe_val(row.get("xG_Diff_adj")) * get_param("xG_Diff")
-        + safe_val(row.get("PP_Diff")) * get_param("PP_Diff")
-        + safe_val(row.get("Goalie_rating")) * get_param("Goalie")
-        + safe_val(row.get("Team_strength")) * get_param("TeamStrength")
+        + home * get_param("Home")
+        + xg_scaled * get_param("xG_Diff")
+        + pp_scaled * get_param("PP_Diff")
+        + goalie_scaled * get_param("Goalie")
+        + strength_scaled * get_param("TeamStrength")
     )
-    return logistic(score)
 
+    return logistic(score)
+    
 # ==================================================
 # Predikce na historických datech
 # ==================================================
