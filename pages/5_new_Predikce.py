@@ -138,6 +138,29 @@ def get_h2h_form(team, opponent, n_games=3):
     return wins / total if total > 0 else 0.5
 
 # ==================================================
+# HELPER – poslední data týmu
+# ==================================================
+def get_latest_team_data(team_name):
+    data = df[df["Team"] == team_name].sort_values("Date")
+
+    if len(data) == 0:
+        return {
+            "PP_Diff": 0.0,
+            "Goalie_rating": 0.0,
+            "Team_strength": 0.0,
+            "Team_form": 0.5
+        }
+
+    last_row = data.iloc[-1]
+
+    return {
+        "PP_Diff": last_row.get("PP_Diff", 0.0),
+        "Goalie_rating": last_row.get("Goalie_rating", 0.0),
+        "Team_strength": last_row.get("Team_strength", 0.0),
+        "Team_form": last_row.get("Team_form", 0.5)
+    }
+
+# ==================================================
 # UI INPUT
 # ==================================================
 st.subheader("Zadej zápas")
