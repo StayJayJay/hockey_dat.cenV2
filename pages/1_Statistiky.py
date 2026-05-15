@@ -81,14 +81,14 @@ if not opp_df.empty:
 # ==================================================
 # FORMA V ČASE
 # ==================================================
-st.subheader("📈 Forma týmu (poslední zápasy)")
+st.subheader("📈 Forma týmu v sezóně")
 
-st.line_chart(team_df.set_index("Date")["Team_form"])
+st.line_chart(team_df.set_index("Date")["Team_form"],opp_df.set_index("Date")["Team_form"])
 
 # ==================================================
 # 📉 TREND FORMY
 # ==================================================
-st.subheader("📉 Trend formy")
+st.subheader("📉 Trend formy v 5 posledních zápasech")
 
 recent_form = team_df["Win"].tail(5).mean()
 season_form = team_df["Win"].mean()
