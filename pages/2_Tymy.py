@@ -131,11 +131,20 @@ st.dataframe(comparison, use_container_width=True)
 # --------------------------------------------------
 # Shrnutí
 # --------------------------------------------------
-diff = ta["Team_Strength"] - tb["Team_Strength"]
+diff_TeamStrength = ta["Team_Strength"] - tb["Team_Strength"]
 
-if diff > 0:
-    st.success(f"{team_a} má vyšší Team Strength o {diff:.2f}")
-elif diff < 0:
-    st.warning(f"{team_b} má vyšší Team Strength o {abs(diff):.2f}")
+if diff_TeamStrength > 0:
+    st.success(f"{team_a} má vyšší Team Strength o {diff_TeamStrength:.2f}")
+elif diff_TeamStrength < 0:
+    st.warning(f"{team_b} má vyšší Team Strength o {abs(diff_TeamStrength):.2f}")
 else:
     st.info("Týmy mají stejnou Team Strength")
+
+diff_xG = ta["avg xG Diff"] - tb["avg xG Diff"]
+
+if diff_xG > 0:
+    st.success(f"{team_a} má vyšší průměrný xG diff o {diff_xG:.2f}")
+elif diff_xG < 0:
+    st.warning(f"{team_b} má vyšší průměrný xG diff o {abs(diff_xG):.2f}")
+else:
+    st.info("Týmy mají stejný průměrný rozdíl xG")
