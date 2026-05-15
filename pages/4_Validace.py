@@ -64,28 +64,42 @@ def safe_val(x):
 
 
 # ==================================================
-# Model s optimalizovaným scalingem
+# Model s xG / Shots fallback + scaling
 # ==================================================
 def predict(row):
     # --- RAW vstupy ---
     home = safe_val(row.get("Home"))
-    xg = safe_val(row.get("xG_Diff_adj"))
+    xg_raw = row.get("xG_Diff_adj")
+    shots = safe_val(row.get("Shots_Diff"))  # fallback
     pp = safe_val(row.get("PP_Diff"))
     goalie = safe_val(row.get("Goalie_rating"))
     strength = safe_val(row.get("Team_strength"))
 
     # ==================================================
-    # 🔥 SCALE FIX (KLÍČOVÉ)
+    # xG FEATURE LOGIC (KLÍČOVÉ)
     # ==================================================
 
-    # xG 
-    xg_scaled = xg * 0.25
+    # pokud xG existuje → použij xG
+    if pd.notna(xg_raw) and abs(xg_raw) > 0:
+        quality = xg_raw
+        quality_source = "xG"
+    else:
+        # fallback → použij střely
+        quality = shots * 0.1
+        quality_source = "Shots"
 
-    # PP 
-    pp_scaled = pp * 6
+    # ==================================================
+    # SCALING
+    # ==================================================
+
+    # kvalita (xG nebo Shots)
+    quality_scaled = quality * 0.15
+
+    # PP
+    pp_scaled = pp * 3
 
     # Goalie
-    goalie_scaled = goalie * 60
+    goalie_scaled = goalie * 25
 
     # Team strength
     strength_scaled = strength
@@ -96,14 +110,24 @@ def predict(row):
     score = (
         get_param("Intercept")
         + home * get_param("Home")
-        + xg_scaled * get_param("xG_Diff")
+        + quality_scaled * get_param("xG_Diff")
         + pp_scaled * get_param("PP_Diff")
         + goalie_scaled * get_param("Goalie")
         + strength_scaled * get_param("TeamStrength")
     )
 
-    return logistic(score)
-    
+    # ==================================================
+    # logistická transformace
+    # ==================================================
+    p = logistic(score)
+
+    # ==================================================
+    # CALIBRATION SHRINK (fix Brier)
+    # ==================================================
+    p = 0.5 + (p - 0.5) * 0.7
+
+    return p
+
 # ==================================================
 # Predikce na historických datech
 # ==================================================
@@ -130,6 +154,10 @@ df[existing_cols] = df[existing_cols].fillna(0)
 
 st.write("Použité sloupce:", existing_cols)
 st.write("Počet řádků po čištění:", len(df))
+st.write("Min prob:", df["P_pred"].min())
+st.write("Max prob:", df["P_pred"].max())
+st.write("Podíl xG vs Shots:")
+st.write((df["xG_Diff_adj"] != 0).mean())
 
 # ==================================================
 # METRIKY
@@ -142,6 +170,7 @@ accuracy = (df["Predicted_Class"] == df["Win"]).mean()
 # Brier score
 df_clean = df.dropna(subset=["P_pred", "Win"])
 brier = np.mean((df_clean["P_pred"] - df_clean["Win"]) ** 2)
+
 
 # ==================================================
 # KALIBRACE MODELU
