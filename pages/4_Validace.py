@@ -68,9 +68,17 @@ def predict(row):
 # ==================================================
 # Predikce na historických datech
 # ==================================================
+st.subheader("🔍 Debug NaN")
+
+st.write("NaN v P_pred:", df["P_pred"].isna().sum())
+st.write("NaN ve Win:", df["Win"].isna().sum())
 
 df["P_pred"] = df.apply(predict, axis=1)
 
+st.subheader("🔍 Debug NaN")
+
+st.write("NaN v P_pred:", df["P_pred"].isna().sum())
+st.write("NaN ve Win:", df["Win"].isna().sum())
 # ==================================================
 # ČIŠTĚNÍ DAT (správné)
 # ==================================================
