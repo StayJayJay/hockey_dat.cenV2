@@ -33,6 +33,20 @@ def load_data():
 df, params_raw = load_data()
 
 # ==================================================
+# TRAIN / TEST SPLIT
+# ==================================================
+from sklearn.model_selection import train_test_split
+
+df_train, df_test = train_test_split(
+    df,
+    test_size=0.3,
+    random_state=42
+)
+
+st.write("Train size:", len(df_train))
+st.write("Test size:", len(df_test))
+
+# ==================================================
 # Parametry
 # ==================================================
 params_raw = params_raw.iloc[:, :4]
@@ -193,7 +207,9 @@ def predict(row):
 # Predikce na historických datech
 # ==================================================
 
-df["P_pred"] = df.apply(predict, axis=1)
+df_train["P_pred"] = df_train.apply(predict, axis=1)
+df_test["P_pred"] = df_test.apply(predict, axis=1)
+
 
 # ==================================================
 # ČIŠTĚNÍ DAT (správné)
@@ -229,7 +245,7 @@ df["Predicted_Class"] = (df["P_pred"] > 0.5).astype(int)
 accuracy = (df["Predicted_Class"] == df["Win"]).mean()
 
 # Brier score
-df_clean = df.dropna(subset=["P_pred", "Win"])
+df_clean = df_test.dropna(subset=["P_pred", "Win"])
 brier = np.mean((df_clean["P_pred"] - df_clean["Win"]) ** 2)
 
 
