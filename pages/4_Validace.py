@@ -38,7 +38,7 @@ df, params_raw = load_data()
 params_raw = params_raw.iloc[:, :4]
 params_raw.columns = ["Parameter", "Coefficient", "Source", "Note"]
 params_raw = params_raw.dropna(subset=["Parameter", "Coefficient"])
-params_raw["Parameter"] = params_raw["Parameter"].astype(str).str.strip()
+#params_raw["Parameter"] = params_raw["Parameter"].astype(str).str.strip()
 
 params = params_raw.set_index("Parameter")["Coefficient"]
 
