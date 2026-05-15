@@ -83,7 +83,7 @@ if not opp_df.empty:
 # ==================================================
 st.subheader("📈 Forma týmu v sezóně")
 
-st.line_chart(team_df.set_index("Date")["Team_form"],opp_df.set_index("Date")["Team_form"])
+st.line_chart(team_df.set_index("Date")["Team_form"])
 
 # ==================================================
 # 📉 TREND FORMY
