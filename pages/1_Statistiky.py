@@ -81,7 +81,6 @@ if not opp_df.empty:
 # ==================================================
 # FORMA V ČASE
 # ==================================================
-st.subheader("📈 Forma týmu v sezóně")
 
 st.subheader("📈 Formy týmů v sezóně")
 
@@ -101,7 +100,7 @@ form_plot = pd.concat([
 # 👉 seřaď podle data
 form_plot = form_plot.sort_index()
 
-st.line_chart(form_plot)
+st.line_chart(form_plot,color="red")
 # ==================================================
 # 📉 TREND FORMY
 # ==================================================
