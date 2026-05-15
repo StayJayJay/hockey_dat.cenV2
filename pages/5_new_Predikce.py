@@ -192,20 +192,21 @@ st.write(f"🔥 H2H poslední 3 zápasy: {h2h_form:.2f}")
 # PREDIKCE
 # ==================================================
 
-    X_input = pd.DataFrame([{
-        "Home": home,
-        "PP_Diff": pp,
-        "Goalie_rating": goalie,
-        "Team_strength": strength,
-        "quality": quality,
-        "Team_form": team_form,
-        "Opponent_form": opp_form,
-        "H2H_form": h2h_form
-    }])
+X_input = pd.DataFrame([{
+    "Home": home,
+    "PP_Diff": pp,
+    "Goalie_rating": goalie,
+    "Team_strength": strength,
+    "quality": quality,
+    "Team_form": team_form,
+    "Opponent_form": opp_form,
+    "H2H_form": h2h_form
+}])
 
-    prob = model.predict_proba(X_input)[0][1]
+prob = model.predict_proba(X_input)[0][1]
 
-    st.metric("📊 Pravděpodobnost výhry", f"{prob*100:.1f} %")
+st.metric("📊 Pravděpodobnost výhry", f"{prob*100:.1f} %")
+
 if prob > 0.65:
     st.success("🔥 Strong pick")
 elif prob > 0.55:
