@@ -97,7 +97,8 @@ existing_cols = [col for col in required_cols if col in df.columns]
 st.write("Použité sloupce:", existing_cols)
 
 # dropni jen ty, co existují
-df = df.dropna(subset=existing_cols)
+df = df.dropna(subset=["Home", "xG_Diff_adj", "PP_Diff"])
+
 
 st.write("Počet řádků po čištění:", len(df))
 
