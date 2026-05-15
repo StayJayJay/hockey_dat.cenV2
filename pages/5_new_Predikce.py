@@ -191,19 +191,37 @@ st.write(f"🔥 H2H poslední 3 zápasy: {h2h_form:.2f}")
 # ==================================================
 # PREDIKCE
 # ==================================================
-if st.button("Spočítat predikci"):
 
-    X_input = pd.DataFrame([{
-        "Home": home,
-        "PP_Diff": pp,
-        "Goalie_rating": goalie,
-        "Team_strength": strength,
-        "quality": quality,
-        "Team_form": team_form,
-        "Opponent_form": opp_form,
-        "H2H_form": h2h_form
-    }])
+X_input = pd.DataFrame([{
+    "Home": home,
+    "PP_Diff": pp,
+    "Goalie_rating": goalie,
+    "Team_strength": strength,
+    "quality": quality,
+    "Team_form": team_form,
+    "Opponent_form": opp_form,
+    "H2H_form": h2h_form
+}])
 
     prob = model.predict_proba(X_input)[0][1]
 
     st.metric("📊 Pravděpodobnost výhry", f"{prob*100:.1f} %")
+    if prob > 0.65:
+    st.success("🔥 Strong pick")
+elif prob > 0.55:
+    st.info("✅ Slight advantage")
+else:
+    st.warning("⚖️ No clear edge")
+
+
+if team_form > opp_form:
+    st.success("✅ Tým je ve lepší formě")
+else:
+    st.warning("⚠️ Soupeř má lepší formu")
+
+st.subheader("🔍 Vysvětlení")
+
+st.write(f"📊 Forma týmu: {team_form:.2f}")
+st.write(f"📊 Forma soupeře: {opp_form:.2f}")
+st.write(f"🔥 H2H: {h2h_form:.2f}")
+st.write(f"⚡ PP diff: {pp:.2f}")
