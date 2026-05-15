@@ -205,7 +205,10 @@ X_input = pd.DataFrame([{
 
 prob = model.predict_proba(X_input)[0][1]
 
-st.metric("📊 Pravděpodobnost výhry", f"{prob*100:.1f} %")
+# kalibrace (shrinking extrémů)
+prob_calibrated = 0.5 + (prob - 0.5) * 0.6
+
+st.metric("📊 Pravděpodobnost výhry", f"{prob_calibrated*100:.1f} %")
 
 if prob > 0.65:
     st.success("🔥 Strong pick")
@@ -226,3 +229,12 @@ st.write(f"📊 Forma týmu: {team_form:.2f}")
 st.write(f"📊 Forma soupeře: {opp_form:.2f}")
 st.write(f"🔥 H2H: {h2h_form:.2f}")
 st.write(f"⚡ PP diff: {pp:.2f}")
+
+odds = st.number_input("Kurz", value=2.0)
+
+implied = 1 / odds
+
+if prob_calibrated > implied:
+    st.success("💰 VALUE BET")
+else:
+    st.warning("❌ No value")
