@@ -82,11 +82,11 @@ def predict(row):
     # pokud xG existuje → použij xG
     if pd.notna(xg_raw) and abs(xg_raw) > 0:
         quality = xg_raw
-        quality_source = "xG"
+        quality_weight = 1.0
     else:
         # fallback → použij střely
         quality = shots * 0.1
-        quality_source = "Shots"
+        quality_weight = 0.6
 
     # ==================================================
     # SCALING
@@ -110,7 +110,7 @@ def predict(row):
     score = (
         get_param("Intercept")
         + home * get_param("Home")
-        + quality_scaled * get_param("xG_Diff")
+        + quality_scaled * get_param("xG_Diff") * quality_weight
         + pp_scaled * get_param("PP_Diff")
         + goalie_scaled * get_param("Goalie")
         + strength_scaled * get_param("TeamStrength")
