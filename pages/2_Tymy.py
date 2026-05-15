@@ -140,7 +140,7 @@ elif diff_TeamStrength < 0:
 else:
     st.info("Týmy mají stejnou Team Strength")
 
-diff_xG = ta["avg xG Diff"] - tb["avg xG Diff"]
+diff_xG = ta["avg_xG_Diff"] - tb["avg_xG_Diff"]
 
 if diff_xG > 0:
     st.success(f"{team_a} má vyšší průměrný xG diff o {diff_xG:.2f}")
