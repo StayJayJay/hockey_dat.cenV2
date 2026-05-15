@@ -338,7 +338,7 @@ df = df.merge(
     how="left"
 )
 
-
+df["Form_diff"] = df["Team_form"] - df["Opponent_form"]
 
 # ==================================================
 # ML MODEL (Logistic Regression)
@@ -355,8 +355,8 @@ try:
     mask = df_ml["quality"].isna() | (df_ml["quality"] == 0)
     df_ml.loc[mask, "quality"] = df_ml["Shots_Diff"] * 0.1
 
-    features = ["Home","PP_Diff","Goalie_rating","Team_strength","quality","Team_form","Opponent_form"]
-
+    features = ["Home","PP_Diff","Goalie_rating","Team_strength","quality","Team_form","Opponent_form","Form_diff"]
+    
     # split stejné jako výš
     df_ml_shuffled = df_ml.sample(frac=1, random_state=42).reset_index(drop=True)
     split_index = int(len(df_ml_shuffled) * 0.7)
