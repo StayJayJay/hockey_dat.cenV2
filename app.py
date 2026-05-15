@@ -28,9 +28,6 @@ with st.sidebar:
         """
     )
 
-    st.markdown("📁 **Zdroj dat:**")
-    st.code("HOCKEY_LOGIC_PREDICTIONS.xlsx", language="text")
-
 # ==================================================
 # Cacheované načtení Excelu
 # ==================================================
@@ -57,17 +54,13 @@ st.markdown(
     ---
     ### Co tady najdeš:
     **Statistiky**
-    - zápasová data
-    - přesilovky, oslabení
-    - střely, xG, góly
 
     **Týmy**
     - Team Strength
     - PP / PK
-    - forma a srovnání
+    - porovnání
 
     **Predikce**
-    - přepínání RS / PO
     - What‑if analýza
     - transparentní výpočet P(Win)
 
