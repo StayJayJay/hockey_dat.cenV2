@@ -151,13 +151,13 @@ def predict(row):
     # ==================================================
 
     # kvalita (xG nebo Shots)
-    quality_scaled = quality * 0.15
+    quality_scaled = quality * 0.2
 
     # PP
-    pp_scaled = pp * 3
+    pp_scaled = pp * 4
 
     # Goalie
-    goalie_scaled = goalie * 25
+    goalie_scaled = goalie * 15
 
     # Team strength
     strength_scaled = strength
