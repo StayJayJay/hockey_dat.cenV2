@@ -94,9 +94,9 @@ recent_form = team_df["Win"].tail(5).mean()
 season_form = team_df["Win"].mean()
 
 if recent_form > season_form:
-    st.success("📈 Tým se zlepšuje")
+    st.success("📈 Tým se zlepšuje za posledních 5 zápaů")
 else:
-    st.warning("📉 Tým se zhoršuje")
+    st.warning("📉 Tým se zhoršuje za posledních 5 zápasů")
 
 
 # ==================================================
@@ -105,7 +105,7 @@ else:
 st.subheader("📅 Poslední zápasy")
 
 st.dataframe(
-    team_df.tail(10)[
+    team_df.tail(5)[
         ["Date", "Opponent", "Win", "Team_form"]
     ]
 )
