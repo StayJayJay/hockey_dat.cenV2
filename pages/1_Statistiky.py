@@ -83,8 +83,25 @@ if not opp_df.empty:
 # ==================================================
 st.subheader("📈 Forma týmu v sezóně")
 
-st.line_chart(team_df.set_index("Date")["Team_form"])
+st.subheader("📈 Formy týmů v sezóně")
 
+# 👉 data týmu
+team_plot = team_df.set_index("Date")["Team_form"]
+
+# 👉 data vybraného soupeře (celková forma v čase)
+opp_df = df[df["Team"] == opponent].copy()
+opp_plot = opp_df.set_index("Date")["Team_form"]
+
+# 👉 spojení do jednoho dataframe
+form_plot = pd.concat([
+    team_plot.rename("Tým"),
+    opp_plot.rename("Soupeř")
+], axis=1)
+
+# 👉 seřaď podle data
+form_plot = form_plot.sort_index()
+
+st.line_chart(form_plot)
 # ==================================================
 # 📉 TREND FORMY
 # ==================================================
