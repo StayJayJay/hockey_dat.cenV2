@@ -143,7 +143,7 @@ col2.metric("✈️ Away win rate", f"{away_games*100:.1f}%")
 # ==================================================
 st.subheader("📊 Distribuce výsledků")
 
-st.bar_chart(team_df["Win"],x=["Date"])
+st.bar_chart(team_df[["Date","Win"]].set_index("Date"))
 
 # ==================================================
 # SILNÁ / SLABÁ STRÁNKA
