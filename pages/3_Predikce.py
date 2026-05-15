@@ -71,14 +71,33 @@ team_list = sorted(teams_rs["Team"].unique())
 col1, col2 = st.columns(2)
 
 with col1:
-    home_team = st.selectbox("Domácí tým", team_list)
+    home_team = st.selectbox ("Domácí tým", team_list)
 
 with col2:
-    away_team = st.selectbox(
-        "Hosté",
-        team_list,
-        index=1 if len(team_list) > 1 else 0
-    )
+    away_team = st.selectbox ("Hosté", team_list,index=1 if len(team_list) > 1 else 0 )
+
+# ==================================================
+# AUTO INPUTS (výchozí hodnoty z dat)
+# ==================================================
+def get_team_stat(team, column):
+    value = teams.loc[teams["Team"] == team, column]
+    if value.empty:
+        return 0.0
+    return float(value.iloc[0])
+
+home_xg = get_team_stat(home_team, "avg_xG_Diff")
+away_xg = get_team_stat(away_team, "avg_xG_Diff")
+
+home_pp = get_team_stat(home_team, "avg_PP_Rate")
+away_pp = get_team_stat(away_team, "avg_PP_Rate")
+
+# AUTO rozdíly
+auto_xg_diff = home_xg - away_xg
+auto_pp_diff = home_pp - away_pp
+
+st.subheader("⚙️ Modelové vstupy")
+
+auto_mode = st.toggle("Automatické vyplnění vstupů", value=True)
 
 def team_strength(team):
     value = teams_rs.loc[
@@ -102,20 +121,43 @@ st.subheader("Modelové vstupy")
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    xg_diff = st.slider("xG Diff", -4.0, 4.0, 0.0, 0.05)
+    xg_diff = st.slider(
+        "xG Diff",
+        -3.0, 3.0,
+        auto_xg_diff if auto_mode else 0.0,
+        0.05
+    )
 
 with c2:
-    pp_diff = st.slider("PP Diff", -1.5, 1.5, 0.0, 0.01)
+    pp_diff = st.slider(
+        "PP Diff",
+        -0.5, 0.5,
+        auto_pp_diff if auto_mode else 0.0,
+        0.01
+    )
 
 with c3:
-    goalie_rating = st.slider("Goalie rating", -0.50, 0.50, 0.0, 0.01)
+    goalie_rating = st.slider(
+        "Goalie rating",
+        -0.05, 0.05,
+        0.0,  # zatím ruční
+        0.001
+    )
 
 with c4:
     home = st.radio("Home", [1, 0], horizontal=True)
 
+if auto_mode:
+    st.info(f"""
+    Auto hodnoty:
+    • xG Diff: {auto_xg_diff:.2f}
+    • PP Diff: {auto_pp_diff:.2f}
+    """)
+
 # ==================================================
 # Model
 # ==================================================
+
 def get_param(name, default=0.0):
     if name not in params.index:
         st.warning(f"Chybí parametr: {name}")
