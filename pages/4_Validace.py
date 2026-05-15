@@ -57,11 +57,11 @@ def logistic(x):
 def predict(row):
     score = (
         get_param("Intercept")
-        + row["Home"] * get_param("Home")
-        + row["xG_Diff_adj"] * get_param("xG_Diff")
-        + row["PP_Diff"] * get_param("PP_Diff")
-        + row["Goalie_rating"] * get_param("Goalie")
-        + row["Team_strength"] * get_param("TeamStrength")
+        + row.get("Home", 0) * get_param("Home")
+        + row.get("xG_Diff_adj", 0) * get_param("xG_Diff")
+        + row.get("PP_Diff", 0) * get_param("PP_Diff")
+        + row.get("Goalie_rating", 0) * get_param("Goalie")
+        + row.get("Team_strength", 0) * get_param("TeamStrength")
     )
     return logistic(score)
 
@@ -96,8 +96,8 @@ existing_cols = [col for col in required_cols if col in df.columns]
 
 st.write("Použité sloupce:", existing_cols)
 
-# dropni jen ty, co existují
-df = df.dropna(subset=["Home", "xG_Diff_adj", "PP_Diff"])
+# místo dropna
+df[existing_cols] = df[existing_cols].fillna(0)
 
 
 st.write("Počet řádků po čištění:", len(df))
