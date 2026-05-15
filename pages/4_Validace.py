@@ -43,10 +43,10 @@ params_raw["Parameter"] = params_raw["Parameter"].astype(str).str.strip()
 params = params_raw.set_index("Parameter")["Coefficient"]
 
 # bezpečný getter
-#def get_param(name, default=0.0):
-#    if name not in params.index:
-#        return default
-#    return float(params[name])
+def get_param(name, default=0.0):
+    if name not in params.index:
+        return default
+    return float(params[name])
 
 # ==================================================
 # Model
