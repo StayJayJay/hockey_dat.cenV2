@@ -110,6 +110,29 @@ df_clean = df.dropna(subset=["P_pred", "Win"])
 brier = np.mean((df_clean["P_pred"] - df_clean["Win"]) ** 2)
 
 # ==================================================
+# KALIBRACE MODELU
+# ==================================================
+st.subheader("📈 Kalibrace modelu")
+
+# vytvoření binů
+df_clean["bin"] = pd.cut(df_clean["P_pred"], bins=10)
+
+calibration = df_clean.groupby("bin").agg(
+    avg_pred=("P_pred", "mean"),
+    actual_win_rate=("Win", "mean"),
+    count=("Win", "count")
+).reset_index()
+
+# filtr na dost dat
+calibration = calibration[calibration["count"] > 10]
+
+st.line_chart(
+    calibration.set_index("avg_pred")[["actual_win_rate"]]
+)
+
+st.write(calibration)
+
+# ==================================================
 # OUTPUT
 # ==================================================
 st.subheader("📈 Výsledky modelu")
