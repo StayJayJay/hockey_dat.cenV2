@@ -88,7 +88,45 @@ def get_h2h_form(team, opponent, n_games=3):
 
     return score / total_w if total_w > 0 else 0.5
 
+# ==================================================
+# VÝPOČET H2H PRO DATASET
+# ==================================================
+def compute_h2h_for_df(df):
+    h2h_list = []
 
+    for idx, row in df.iterrows():
+        team = row["Team"]
+        opponent = row["Opponent"]
+
+        past_matches = df.iloc[:idx]
+
+        h2h = past_matches[
+            ((past_matches["Team"] == team) & (past_matches["Opponent"] == opponent)) |
+            ((past_matches["Team"] == opponent) & (past_matches["Opponent"] == team))
+        ]
+
+        if len(h2h) == 0:
+            h2h_list.append(0.5)
+            continue
+
+        h2h_last = h2h.tail(3)
+
+        wins = 0
+        total = 0
+
+        for _, m in h2h_last.iterrows():
+            if m["Team"] == team:
+                wins += m["Win"]
+            else:
+                wins += (1 - m["Win"])
+            total += 1
+
+        h2h_list.append(wins / total if total > 0 else 0.5)
+
+    return h2h_list
+
+
+df["H2H_form"] = compute_h2h_for_df(df)
 
 # ==================================================
 # TRAIN ML MODEL
