@@ -27,10 +27,19 @@ df = load_data()
 # ==================================================
 df = df.sort_values(by="Date")
 
+def weighted_form(series):
+    weights = [0.4, 0.3, 0.2, 0.1]
+    recent = series.tail(len(weights)).values[::-1]
+
+    if len(recent) < len(weights):
+        weights = weights[:len(recent)]
+
+    return (recent * weights).sum() / sum(weights)
+    
 df["Team_form"] = (
     df.groupby("Team")["Win"]
-    .rolling(5, min_periods=1)
-    .mean()
+    .rolling(5)
+    .apply(weighted_form, raw=True)
     .reset_index(level=0, drop=True)
 )
 
