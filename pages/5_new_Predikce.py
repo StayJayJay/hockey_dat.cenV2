@@ -90,8 +90,6 @@ def get_h2h_form(team, opponent, n_games=3):
 
 
 
-df["H2H_form"] = compute_h2h_for_df(df)
-
 # ==================================================
 # TRAIN ML MODEL
 # ==================================================
