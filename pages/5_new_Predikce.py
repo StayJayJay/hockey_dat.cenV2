@@ -35,7 +35,7 @@ def weighted_form(series):
         weights = weights[:len(recent)]
 
     return (recent * weights).sum() / sum(weights)
-    
+
 df["Team_form"] = (
     df.groupby("Team")["Win"]
     .rolling(5)
@@ -137,7 +137,24 @@ def get_h2h_form(team, opponent, n_games=3):
 
     for _, row in h2h_last.iterrows():
         if row["Team"] == team:
-            wins += row["Win"]
+            weights = [0.6, 0.3, 0.1]
+
+h2h_last = h2h.tail(len(weights))
+
+score = 0
+total_w = 0
+
+for i, (_, row) in enumerate(reversed(list(h2h_last.iterrows()))):
+    w = weights[i]
+
+    if row["Team"] == team:
+        score += row["Win"] * w
+    else:
+        score += (1 - row["Win"]) * w
+
+    total_w += w
+
+return score / total_w if total_w > 0 else 0.5
         else:
             # když je team "Opponent", musíš invertovat Win
             wins += (1 - row["Win"])
