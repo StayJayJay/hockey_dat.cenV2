@@ -110,54 +110,6 @@ y = df["Win"]
 model = LogisticRegression(max_iter=1000)
 model.fit(X, y)
 
-# ==================================================
-# HEAD-TO-HEAD FORM (last 3 games)
-# ==================================================
-def get_h2h_form(team, opponent, n_games=3):
-    
-    # vyfiltruj vzájemné zápasy
-    h2h = df[
-        ((df["Team"] == team) & (df["Opponent"] == opponent)) |
-        ((df["Team"] == opponent) & (df["Opponent"] == team))
-    ].sort_values("Date")
-
-    if len(h2h) == 0:
-        return 0.5
-
-    # vezmi poslední n zápasů
-    h2h_last = h2h.tail(n_games)
-
-    # přepočti z pohledu teamu
-    wins = 0
-    total = 0
-
-    for _, row in h2h_last.iterrows():
-        if row["Team"] == team:
-            weights = [0.6, 0.3, 0.1]
-
-h2h_last = h2h.tail(len(weights))
-
-score = 0
-total_w = 0
-
-for i, (_, row) in enumerate(reversed(list(h2h_last.iterrows()))):
-    w = weights[i]
-
-    if row["Team"] == team:
-        score += row["Win"] * w
-    else:
-        score += (1 - row["Win"]) * w
-
-    total_w += w
-
-return score / total_w if total_w > 0 else 0.5
-        else:
-            # když je team "Opponent", musíš invertovat Win
-            wins += (1 - row["Win"])
-        
-        total += 1
-
-    return wins / total if total > 0 else 0.5
 
 # ==================================================
 # HELPER – poslední data týmu
