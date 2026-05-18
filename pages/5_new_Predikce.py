@@ -39,7 +39,7 @@ def weighted_form(series):
 df["Team_form"] = (
     df.groupby("Team")["Win"]
     .rolling(5)
-    .apply(weighted_form, raw=True)
+    .apply(weighted_form, raw=False)
     .reset_index(level=0, drop=True)
 )
 
