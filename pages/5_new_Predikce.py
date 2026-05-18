@@ -57,39 +57,37 @@ df.loc[mask, "quality"] = df["Shots_Diff"] * 0.1
 # VYPÍTEJ H2H PRO CELÝ DATASET (DŮLEŽITÉ)
 # ==================================================
 
-def compute_h2h_for_df(df):
-    h2h_list = []
+def get_h2h_form(team, opponent, n_games=3):
 
-    for idx, row in df.iterrows():
-        team = row["Team"]
-        opponent = row["Opponent"]
+    # vyfiltruj vzájemné zápasy
+    h2h = df[
+        ((df["Team"] == team) & (df["Opponent"] == opponent)) |
+        ((df["Team"] == opponent) & (df["Opponent"] == team))
+    ].sort_values("Date")
 
-        past_matches = df.iloc[:idx]
+    if len(h2h) == 0:
+        return 0.5
 
-        h2h = past_matches[
-            ((past_matches["Team"] == team) & (past_matches["Opponent"] == opponent)) |
-            ((past_matches["Team"] == opponent) & (past_matches["Opponent"] == team))
-        ]
+    # váhy (novější zápasy mají větší váhu)
+    weights = [0.6, 0.3, 0.1]
+    h2h_last = h2h.tail(len(weights))
 
-        if len(h2h) == 0:
-            h2h_list.append(0.5)
-            continue
+    score = 0
+    total_w = 0
 
-        h2h_last = h2h.tail(3)
+    # iterace odzadu (nejnovější první)
+    for i, (_, row) in enumerate(reversed(list(h2h_last.iterrows()))):
+        w = weights[i]
 
-        wins = 0
-        total = 0
+        if row["Team"] == team:
+            score += row["Win"] * w
+        else:
+            score += (1 - row["Win"]) * w
 
-        for _, m in h2h_last.iterrows():
-            if m["Team"] == team:
-                wins += m["Win"]
-            else:
-                wins += (1 - m["Win"])
-            total += 1
+        total_w += w
 
-        h2h_list.append(wins / total if total > 0 else 0.5)
+    return score / total_w if total_w > 0 else 0.5
 
-    return h2h_list
 
 
 df["H2H_form"] = compute_h2h_for_df(df)
