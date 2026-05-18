@@ -161,6 +161,15 @@ def get_latest_team_data(team_name):
     }
 
 # ==================================================
+# AUTOMATICKÉ VÝPOČTY (poslední zápasy)
+# ==================================================
+def get_avg_last(team_name, column, n=5):
+    data = df[df["Team"] == team_name][column].tail(n)
+    if len(data) == 0:
+        return 0.0
+    return data.mean()
+
+# ==================================================
 # UI INPUT
 # ==================================================
 st.subheader("Zadej zápas")
@@ -170,16 +179,36 @@ opponent = st.selectbox("Opponent", sorted(df["Team"].unique()))
 
 home = st.selectbox("Home (1 = doma)", [1, 0])
 
-pp = st.number_input("PP Diff", value=0.0)
-goalie = st.number_input("Goalie rating", value=0.0)
-strength = st.number_input("Team strength", value=0.0)
+use_auto = st.checkbox("Použít automatické hodnoty", value=True)
+
+# výchozí hodnoty = auto
+pp = goalie = strength = quality = 0.0
+
+if use_auto:
+
+    pp = get_avg_last(team, "PP_Diff") - get_avg_last(opponent, "PP_Diff")
+    goalie = get_avg_last(team, "Goalie_rating") - get_avg_last(opponent, "Goalie_rating")
+    strength = get_avg_last(team, "Team_strength") - get_avg_last(opponent, "Team_strength")
+    quality = get_avg_last(team, "quality") - get_avg_last(opponent, "quality")
+
+    st.write("📊 Automatické vstupy:")
+    st.write(f"⚡ PP diff: {pp:.2f}")
+    st.write(f"🧤 Goalie diff: {goalie:.3f}")
+    st.write(f"🏒 Strength diff: {strength:.2f}")
+    st.write(f"📈 xG diff: {quality:.2f}")
+
+else:
+    pp = st.number_input("PP Diff", value=0.0)
+    goalie = st.number_input("Goalie rating", value=0.0)
+    strength = st.number_input("Team strength", value=0.0)
+    quality = st.number_input("xG Diff", value=0.0)
+
+if abs(pp) > 0.5:
+    st.success("⚡ Velký rozdíl v přesilovkách")
 
 # vezmi historickou formu
 team_form = df[df["Team"] == team]["Team_form"].iloc[-1]
 opp_form = df[df["Team"] == opponent]["Team_form"].iloc[-1]
-
-# quality fallback (zadáš xG nebo jen použij default)
-quality = st.number_input("xG Diff (nebo 0)", value=0.0)
 
 team_data = get_latest_team_data(team)
 opp_data = get_latest_team_data(opponent)
