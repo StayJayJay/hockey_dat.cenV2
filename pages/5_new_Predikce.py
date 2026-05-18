@@ -42,6 +42,7 @@ df["Team_form"] = (
     .apply(weighted_form, raw=False)
     .reset_index(level=0, drop=True)
 )
+df["Team_form"] = df["Team_form"].fillna(0.5)
 
 team_form_lookup = df[["Team", "Date", "Team_form"]].copy()
 team_form_lookup.columns = ["Opponent", "Date", "Opponent_form"]
